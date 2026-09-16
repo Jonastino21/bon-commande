@@ -1,0 +1,28 @@
+{
+  "name": "verif-achats",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Application interne de creation d'achats a partir du catalogue Verif K7",
+  "scripts": {
+    "importer": "tsx src/cli/importer.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "verif-types": "tsc --noEmit",
+    "initialiser": "tsx src/cli/initialiser.ts",
+    "serveur": "tsx src/serveur/serveur.ts",
+    "build": "npm --prefix web run build",
+    "demarrer": "npm run build && tsx src/serveur/serveur.ts"
+  },
+  "dependencies": {
+    "@fastify/static": "^10.1.3",
+    "fastify": "^5.12.5",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.5",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.2"
+  }
+}

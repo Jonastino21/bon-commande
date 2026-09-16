@@ -1,0 +1,57 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-ardoise-50: #f6f7f9;
+  --color-ardoise-100: #ebedf1;
+  --color-ardoise-200: #d3d8e0;
+  --color-ardoise-400: #8a94a6;
+  --color-ardoise-600: #4b5563;
+  --color-ardoise-800: #23304a;
+  --color-ardoise-900: #16203a;
+  --color-accent-50: #eef6ff;
+  --color-accent-100: #d9ecff;
+  --color-accent-500: #1b6ec2;
+  --color-accent-600: #155a9e;
+  --color-accent-700: #11487e;
+}
+
+html {
+  background: var(--color-ardoise-50);
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  color: var(--color-ardoise-900);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Les fleches natives des champs numeriques sont trop petites pour etre
+   visees a la souris et parasitent l'alignement des colonnes chiffrees. */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+/* Les montants sont alignes sur des chiffres de largeur fixe : sans cela,
+   comparer deux prix dans une colonne demande un effort de lecture. */
+.chiffres {
+  font-variant-numeric: tabular-nums;
+}
+
+@media print {
+  .sans-impression {
+    display: none !important;
+  }
+  body {
+    background: white;
+  }
+  .zone-impression {
+    box-shadow: none !important;
+    border: none !important;
+  }
+}
