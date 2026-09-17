@@ -1,5 +1,6 @@
 import Fastify from 'fastify';
 import fastifyStatic from '@fastify/static';
+import fastifyCors from '@fastify/cors';
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { z } from 'zod';
@@ -16,6 +17,11 @@ import {
   TYPES_DOCUMENT,
   type TypeDocument,
 } from '../bdd/documents.js';
+import { validerFichier } from '../import/schema.js';
+import { extraire } from '../import/extraction.js';
+import { construireLots } from '../import/lots.js';
+import { construireRapport } from '../import/rapport.js';
+import { ingererImportInitial } from '../bdd/ingestion.js';
 
 /**
  * API interne de l'application.
@@ -65,7 +71,11 @@ export type OptionsServeur = {
 };
 
 export function construireServeur(bdd: Bdd, dossierWeb?: string) {
-  const app = Fastify({ logger: false });
+  const app = Fastify({ logger: false, bodyLimit: 100 * 1024 * 1024 });
+
+  // Autorise les requêtes cross-origin depuis l'extension Chrome (qui tourne
+  // dans le contexte de verifk7.krkfr.net) et depuis localhost en dev.
+  app.register(fastifyCors, { origin: true });
 
   app.setErrorHandler((erreur, _requete, reponse) => {
     // Les messages techniques ne remontent jamais tels quels a l'ecran : ils
@@ -150,6 +160,52 @@ export function construireServeur(bdd: Bdd, dossierWeb?: string) {
     const document = changerStatut(bdd, id, analyse.data.statut);
     if (!document) return reponse.status(404).send({ erreur: 'Document introuvable.' });
     return document;
+  });
+
+  app.post('/api/import/tarifs', async (requete, reponse) => {
+    const cleAttendue = process.env['VERIF_API_KEY'];
+    if (!cleAttendue) {
+      return reponse.status(503).send({
+        erreur: "Import desactive : variable d'environnement VERIF_API_KEY non definie.",
+      });
+    }
+    if (requete.headers['x-api-key'] !== cleAttendue) {
+      return reponse.status(401).send({ erreur: 'Cle API invalide.' });
+    }
+
+    const corps = requete.body as unknown;
+    const tailleOctets = Buffer.byteLength(JSON.stringify(corps));
+
+    const validation = validerFichier(corps);
+    if (!validation.ok) {
+      return reponse.status(400).send({
+        erreur: `Donnees invalides : ${validation.problemes[0]?.message ?? 'format inconnu'}`,
+      });
+    }
+
+    const aujourd = new Date();
+    const extraction = extraire(validation.fichier.rows, aujourd);
+    const lots = construireLots(extraction.tarifs);
+    const nomFichier = `push_${aujourd.toISOString().replace(/[:.]/g, '-')}.json`;
+    const rapport = construireRapport({
+      nomFichier,
+      tailleOctets,
+      fichier: validation.fichier,
+      extraction,
+      lots,
+      avertissements: validation.avertissements,
+    });
+
+    const ingestion = ingererImportInitial(bdd, extraction, rapport, { remplacer: true });
+
+    return {
+      ok: true,
+      importId: ingestion.importId,
+      produits: ingestion.produitsInseres,
+      tiers: ingestion.tiersInseres,
+      tarifs: ingestion.tarifsInseres,
+      avertissements: rapport.avertissements,
+    };
   });
 
   if (dossierWeb && existsSync(dossierWeb)) {

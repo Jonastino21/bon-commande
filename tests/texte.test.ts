@@ -95,6 +95,17 @@ describe('nettoyerLibelle', () => {
 });
 
 describe('normaliserPourRecherche', () => {
+  it('replie les ligatures, que NFD ne decompose pas', () => {
+    // Bug reel : "Nutri-04-Cœur Comprimés B/10grs" etait indexe
+    // "nutri 04 c ur comprimes b 10grs" et restait introuvable en tapant
+    // "coeur", personne n'ayant la ligature au clavier.
+    expect(normaliserPourRecherche('Nutri-04-Cœur')).toBe('nutri 04 coeur');
+    expect(normaliserPourRecherche('cœur')).toBe(normaliserPourRecherche('coeur'));
+    expect(normaliserPourRecherche('Œuvre')).toBe('oeuvre');
+    expect(normaliserPourRecherche('lætitia')).toBe('laetitia');
+    expect(normaliserPourRecherche('Straße')).toBe('strasse');
+  });
+
   it('rend la recherche insensible aux accents et a la casse', () => {
     expect(normaliserPourRecherche('galérie photo')).toBe('galerie photo');
     expect(normaliserPourRecherche('Réalisation d un site d ecommerce')).toBe(

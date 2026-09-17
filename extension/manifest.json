@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Verif K7 - Export de données",
+  "version": "1.2.0",
+  "description": "Extrait en JSON/CSV les données des tableaux du portail Verif K7 (verifk7.krkfr.net), pour usage interne autorisé par l'entreprise.",
+  "host_permissions": [
+    "https://verifk7.krkfr.net/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://verifk7.krkfr.net/*"],
+      "js": ["content.js"],
+      "world": "MAIN",
+      "run_at": "document_idle"
+    }
+  ]
+}

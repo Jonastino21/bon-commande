@@ -138,11 +138,35 @@ export function nettoyerLibelle(brut: unknown): ResultatTexte {
  * C'est cette valeur qui alimentera l'index de recherche, pour qu'une saisie
  * "galerie photo" retrouve "galerie photo" accentue.
  */
+/**
+ * Ligatures et lettres que NFD ne decompose PAS.
+ *
+ * NFD separe une lettre accentuee en base + diacritique, ce qui suffit pour
+ * "comprimes". Mais "oe" n'est pas un "o" accentue : c'est un caractere a
+ * part entiere, que NFD laisse intact et que le filtre [^a-z0-9] transformait
+ * donc en espace. "Nutri-04-Coeur" etait indexe "nutri 04 c ur" et restait
+ * introuvable a quelqu'un tapant "coeur" — personne n'ayant la ligature au
+ * clavier, le produit etait invisible en pratique.
+ *
+ * Seules les lettres sans decomposition NFD figurent ici. En ajouter une qui
+ * se decompose serait sans effet ; en ajouter une que NFD ignore mais que le
+ * portage PHP ne connait pas ferait diverger les deux implementations.
+ */
+const LIGATURES: ReadonlyArray<readonly [RegExp, string]> = [
+  [/œ/g, 'oe'],
+  [/æ/g, 'ae'],
+  [/ß/g, 'ss'],
+];
+
 export function normaliserPourRecherche(texte: string): string {
-  return texte
+  let resultat = texte
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, ' ')
-    .trim();
+    .toLowerCase();
+
+  for (const [motif, remplacement] of LIGATURES) {
+    resultat = resultat.replace(motif, remplacement);
+  }
+
+  return resultat.replace(/[^a-z0-9]+/g, ' ').trim();
 }
