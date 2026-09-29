@@ -43,7 +43,14 @@ input[type='number'] {
   font-variant-numeric: tabular-nums;
 }
 
+.seulement-impression {
+  display: none;
+}
+
 @media print {
+  tfoot.seulement-impression {
+    display: table-footer-group;
+  }
   .sans-impression {
     display: none !important;
   }
