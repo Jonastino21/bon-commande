@@ -214,7 +214,11 @@ export function NouvelleOperation({ documentId }: { documentId?: number }) {
           <div>
             <div className="mb-1.5 flex items-center gap-2">
               <label className="text-sm font-medium text-ardoise-600">Fournisseur</label>
-              {fournisseurAutoRempli && !fige && <Badge ton="info">rempli automatiquement</Badge>}
+              {fournisseurAutoRempli && !fige && (
+                <span className="sans-impression">
+                  <Badge ton="info">rempli automatiquement</Badge>
+                </span>
+              )}
             </div>
             <input
               value={tiersLibelle}
