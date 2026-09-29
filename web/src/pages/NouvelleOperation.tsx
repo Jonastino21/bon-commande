@@ -355,6 +355,22 @@ export function NouvelleOperation({ documentId }: { documentId?: number }) {
                   </tr>
                 ))}
               </tbody>
+              {/* A l'ecran le total est dans la barre fixe, masquee a
+                  l'impression : on le repete ici pour la facture imprimee. */}
+              <tfoot className="seulement-impression">
+                <tr className="border-t-2 border-ardoise-300">
+                  <td colSpan={4} className="px-3 py-3 text-ardoise-600">
+                    {lignes.length} ligne{lignes.length > 1 ? 's' : ''} · {quantiteTotale} article
+                    {quantiteTotale > 1 ? 's' : ''}
+                  </td>
+                  <td className="px-3 py-3 text-right text-xs font-medium uppercase tracking-wide text-ardoise-600">
+                    Total général
+                  </td>
+                  <td className="chiffres px-3 py-3 text-right text-base font-bold text-ardoise-900">
+                    {formaterAriary(total)}
+                  </td>
+                </tr>
+              </tfoot>
             </table>
           </div>
         )}
