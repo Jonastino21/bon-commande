@@ -2,6 +2,8 @@ node_modules/
 data/*.json
 sortie/
 *.db
+*.db-wal
+*.db-shm
 vendor/
 .phpunit.result.cache
 _bmad/render/
